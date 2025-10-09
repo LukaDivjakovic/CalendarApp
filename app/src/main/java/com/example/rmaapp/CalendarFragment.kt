@@ -22,7 +22,8 @@ class CalendarFragment : Fragment() {
         val dayViewButton = view.findViewById<ImageView>(R.id.day_view_button)
 
         addEventButton.setOnClickListener {
-            Toast.makeText(requireContext(), "Add event clicked", Toast.LENGTH_SHORT).show()
+            val addEventFragment = AddEventFragment()
+            addEventFragment.show(parentFragmentManager, "AddEventFragment")
         }
 
         weekViewButton.setOnClickListener {
