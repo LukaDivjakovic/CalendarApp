@@ -17,9 +17,9 @@ class CalendarFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_calendar, container, false)
 
-        val addEventButton = view.findViewById<ImageView>(R.id.add_event_button)
-        val weekViewButton = view.findViewById<ImageView>(R.id.week_view_button)
-        val dayViewButton = view.findViewById<ImageView>(R.id.day_view_button)
+        val addEventButton = view.findViewById<ImageView>(R.id.baseline_add_box_24)
+        val weekViewButton = view.findViewById<ImageView>(R.id.baseline_calendar_view_week_24)
+        val dayViewButton = view.findViewById<ImageView>(R.id.baseline_calendar_view_day_24)
 
         addEventButton.setOnClickListener {
             val addEventFragment = AddEventFragment()
