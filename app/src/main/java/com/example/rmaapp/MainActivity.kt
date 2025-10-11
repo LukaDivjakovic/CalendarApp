@@ -1,8 +1,11 @@
 package com.example.rmaapp
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -24,21 +27,41 @@ class MainActivity : AppCompatActivity() {
 
         isTablet = resources.getBoolean(R.bool.isTablet)
 
-        if (isTablet) {
-            if (savedInstanceState == null) {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.add_event_fragment_container, AddEventFragment())
-                    .commit()
-            }
-        }
-
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        val mainLayout = findViewById<ConstraintLayout>(R.id.main)
+        val addEventContainer = findViewById<View?>(R.id.add_event_fragment_container)
 
         bottomNavigationView.setOnItemSelectedListener { item ->
             var selectedFragment: Fragment? = null
             when (item.itemId) {
-                R.id.action_clock -> selectedFragment = ClockFragment()
-                R.id.action_calendar -> selectedFragment = CalendarFragment()
+                R.id.action_clock -> {
+                    selectedFragment = ClockFragment()
+                    if (isTablet) {
+                        addEventContainer?.visibility = View.GONE
+                        val constraintSet = ConstraintSet()
+                        constraintSet.clone(mainLayout)
+                        constraintSet.connect(R.id.fragment_container, ConstraintSet.END, R.id.main, ConstraintSet.END)
+                        constraintSet.applyTo(mainLayout)
+
+                        supportFragmentManager.findFragmentById(R.id.add_event_fragment_container)?.let {
+                            supportFragmentManager.beginTransaction().remove(it).commit()
+                        }
+                    }
+                }
+                R.id.action_calendar -> {
+                    selectedFragment = CalendarFragment()
+                    if (isTablet) {
+                        addEventContainer?.visibility = View.VISIBLE
+                        val constraintSet = ConstraintSet()
+                        constraintSet.clone(mainLayout)
+                        constraintSet.connect(R.id.fragment_container, ConstraintSet.END, R.id.guideline, ConstraintSet.START)
+                        constraintSet.applyTo(mainLayout)
+
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.add_event_fragment_container, AddEventFragment())
+                            .commit()
+                    }
+                }
             }
             if (selectedFragment != null) {
                 supportFragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit()
@@ -49,7 +72,6 @@ class MainActivity : AppCompatActivity() {
         // Set default fragment
         if (savedInstanceState == null) {
             bottomNavigationView.selectedItemId = R.id.action_clock
-            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, ClockFragment()).commit()
         }
     }
 }
