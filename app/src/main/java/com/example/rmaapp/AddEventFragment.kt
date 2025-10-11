@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
 
-class AddEventFragment : DialogFragment() {
+class AddEventFragment : Fragment() {
 
     private lateinit var eventTitleInput: TextInputEditText
     private lateinit var eventDescriptionInput: TextInputEditText
@@ -53,7 +53,13 @@ class AddEventFragment : DialogFragment() {
         endTimeButton = view.findViewById(R.id.end_time_button)
         allDaySwitch = view.findViewById(R.id.all_day_switch)
         saveEventButton = view.findViewById(R.id.save_event_button)
-        cancelButton = view.findViewById(R.id.cancel_button)
+
+        // The cancel button may not exist in the tablet layout
+        if(view.findViewById<Button>(R.id.cancel_button) != null) {
+            cancelButton = view.findViewById(R.id.cancel_button)
+            cancelButton.setOnClickListener { parentFragmentManager.popBackStack() }
+        }
+
 
         setupClickListeners()
     }
@@ -81,7 +87,6 @@ class AddEventFragment : DialogFragment() {
         }
 
         saveEventButton.setOnClickListener { saveEvent() }
-        cancelButton.setOnClickListener { dismiss() }
     }
 
     private fun pickDate(isStart: Boolean) {
@@ -173,7 +178,9 @@ class AddEventFragment : DialogFragment() {
             val eventDao = AppDatabase.getDatabase(requireContext()).eventDao()
             eventDao.insert(newEvent)
             Toast.makeText(requireContext(), "Event saved!", Toast.LENGTH_SHORT).show()
-            dismiss()
+            if(!resources.getBoolean(R.bool.isTablet)){
+                parentFragmentManager.popBackStack()
+            }
         }
     }
 }

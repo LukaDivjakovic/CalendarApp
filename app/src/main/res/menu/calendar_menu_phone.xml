@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_add_event"
+        android:icon="@drawable/baseline_add_box_24"
+        android:title="Add Event"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_day_view"
+        android:title="Day View"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_week_view"
+        android:title="Week View"
+        app:showAsAction="ifRoom" />
+</menu>

@@ -2,13 +2,24 @@ package com.example.rmaapp
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.android.material.appbar.MaterialToolbar
 
 class CalendarFragment : Fragment() {
+
+    private var isTablet: Boolean = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -17,23 +28,41 @@ class CalendarFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_calendar, container, false)
 
-        val addEventButton = view.findViewById<ImageView>(R.id.baseline_add_box_24)
-        val weekViewButton = view.findViewById<ImageView>(R.id.baseline_calendar_view_week_24)
-        val dayViewButton = view.findViewById<ImageView>(R.id.baseline_calendar_view_day_24)
+        isTablet = resources.getBoolean(R.bool.isTablet)
 
-        addEventButton.setOnClickListener {
-            val addEventFragment = AddEventFragment()
-            addEventFragment.show(parentFragmentManager, "AddEventFragment")
-        }
-
-        weekViewButton.setOnClickListener {
-            Toast.makeText(requireContext(), "Week view clicked", Toast.LENGTH_SHORT).show()
-        }
-
-        dayViewButton.setOnClickListener {
-            Toast.makeText(requireContext(), "Day view clicked", Toast.LENGTH_SHORT).show()
-        }
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
         return view
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        if (isTablet) {
+            inflater.inflate(R.menu.calendar_menu_tablet, menu)
+        } else {
+            inflater.inflate(R.menu.calendar_menu_phone, menu)
+        }
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_add_event -> {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, AddEventFragment())
+                    .addToBackStack(null)
+                    .commit()
+                true
+            }
+            R.id.action_day_view -> {
+                Toast.makeText(requireContext(), "Day view clicked", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.action_week_view -> {
+                Toast.makeText(requireContext(), "Week view clicked", Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
