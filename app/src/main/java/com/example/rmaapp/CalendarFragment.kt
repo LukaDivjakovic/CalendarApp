@@ -32,6 +32,7 @@ class CalendarFragment : Fragment() {
 
         val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbar)
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
+        (activity as AppCompatActivity).supportActionBar?.setDisplayShowTitleEnabled(false)
 
         return view
     }
