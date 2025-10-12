@@ -22,7 +22,7 @@ class DayViewFragment : Fragment() {
 
         if (savedInstanceState == null) {
             val today = LocalDate.now()
-            val dayColumnFragment = DayColumnFragment.newInstance(today)
+            val dayColumnFragment = DayColumnFragment.newInstance(today, showOutline = false)
             childFragmentManager.beginTransaction()
                 .replace(R.id.day_column_container, dayColumnFragment)
                 .commit()

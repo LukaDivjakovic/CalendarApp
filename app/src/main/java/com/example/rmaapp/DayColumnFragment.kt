@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter
 class DayColumnFragment : Fragment() {
 
     private lateinit var date: LocalDate
+    private var showOutline: Boolean = false
     private lateinit var allDayEventsRecyclerView: RecyclerView
     private lateinit var dayEventsRecyclerView: RecyclerView
     private lateinit var allDayEventsContainer: View
@@ -26,7 +28,12 @@ class DayColumnFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            date = it.getSerializable("date") as LocalDate
+            date = LocalDate.parse(it.getString("date"))
+            showOutline = it.getBoolean("showOutline", false)
+        }
+
+        requireActivity().supportFragmentManager.setFragmentResultListener("event_changed_key", this) { _, _ ->
+            loadEvents()
         }
     }
 
@@ -40,6 +47,10 @@ class DayColumnFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (showOutline && date.isEqual(LocalDate.now())) {
+            view.background = ContextCompat.getDrawable(requireContext(), R.drawable.current_day_outline)
+        }
 
         allDayEventsRecyclerView = view.findViewById(R.id.all_day_events_recycler_view)
         dayEventsRecyclerView = view.findViewById(R.id.day_events_recycler_view)
@@ -95,9 +106,10 @@ class DayColumnFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(date: LocalDate) = DayColumnFragment().apply {
+        fun newInstance(date: LocalDate, showOutline: Boolean = false) = DayColumnFragment().apply {
             arguments = Bundle().apply {
-                putSerializable("date", date)
+                putString("date", date.toString())
+                putBoolean("showOutline", showOutline)
             }
         }
     }

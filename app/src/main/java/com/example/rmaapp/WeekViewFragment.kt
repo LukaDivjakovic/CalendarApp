@@ -40,7 +40,7 @@ class WeekViewFragment : Fragment() {
 
             for (i in 0..6) {
                 val day = currentMonday.plusDays(i.toLong())
-                val dayColumnFragment = DayColumnFragment.newInstance(day)
+                val dayColumnFragment = DayColumnFragment.newInstance(day, showOutline = true)
                 childFragmentManager.beginTransaction()
                     .replace(containerIds[i], dayColumnFragment)
                     .commit()

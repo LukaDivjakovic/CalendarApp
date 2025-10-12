@@ -5,9 +5,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
+import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
+import kotlinx.coroutines.launch
 
 class EventDetailFragment : Fragment() {
 
@@ -35,6 +39,7 @@ class EventDetailFragment : Fragment() {
         val timeTextView = view.findViewById<TextView>(R.id.detail_event_time)
         val descriptionTextView = view.findViewById<TextView>(R.id.detail_event_description)
         val exitButton = view.findViewById<ImageButton>(R.id.exit_button)
+        val deleteButton = view.findViewById<Button>(R.id.delete_event_button)
 
         titleTextView.text = event.title
         descriptionTextView.text = event.description
@@ -49,6 +54,18 @@ class EventDetailFragment : Fragment() {
 
         exitButton.setOnClickListener {
             parentFragmentManager.popBackStack()
+        }
+
+        deleteButton.setOnClickListener {
+            lifecycleScope.launch {
+                val eventDao = AppDatabase.getDatabase(requireContext()).eventDao()
+                eventDao.delete(event)
+                
+                // Notify other fragments that an event has changed
+                requireActivity().supportFragmentManager.setFragmentResult("event_changed_key", Bundle())
+                
+                parentFragmentManager.popBackStack()
+            }
         }
     }
 
