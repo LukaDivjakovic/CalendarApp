@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     tools:context=".DayViewFragment">
 
     <TextView
@@ -15,30 +14,10 @@
         android:padding="16dp"
         android:text="Today's Weather: (Not Implemented)" />
 
-    <LinearLayout
-        android:id="@+id/all_day_events_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="All-Day Events" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/all_day_events_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/day_events_recycler_view"
+    <FrameLayout
+        android:id="@+id/day_column_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="16dp" />
+        android:layout_weight="1" />
 
 </LinearLayout>

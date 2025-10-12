@@ -1,5 +1,6 @@
 package com.example.rmaapp
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ class EventAdapter(
         private val titleTextView: TextView = itemView.findViewById(R.id.event_title)
         private val timeTextView: TextView = itemView.findViewById(R.id.event_time)
 
+        @SuppressLint("SetTextI18n")
         fun bind(event: Event) {
             titleTextView.text = event.title
             if (event.isAllDay) {
