@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,10 +31,6 @@ class DayColumnFragment : Fragment() {
         arguments?.let {
             date = LocalDate.parse(it.getString("date"))
             showOutline = it.getBoolean("showOutline", false)
-        }
-
-        requireActivity().supportFragmentManager.setFragmentResultListener("event_changed_key", this) { _, _ ->
-            loadEvents()
         }
     }
 
@@ -63,10 +60,10 @@ class DayColumnFragment : Fragment() {
         val formatter = DateTimeFormatter.ofPattern("EEE d")
         dayHeaderText.text = date.format(formatter)
 
-        loadEvents()
+        refreshEvents()
     }
 
-    private fun loadEvents() {
+    fun refreshEvents() {
         lifecycleScope.launch {
             val startOfDay = date.atStartOfDay()
             val endOfDay = date.plusDays(1).atStartOfDay()
@@ -91,18 +88,26 @@ class DayColumnFragment : Fragment() {
         val isTablet = resources.getBoolean(R.bool.isTablet)
         val detailFragment = EventDetailFragment.newInstance(event)
 
-        if (isTablet) {
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.add_event_fragment_container, detailFragment)
-                .addToBackStack(null)
-                .commit()
+        val fragmentManager = if (isTablet) {
+            requireActivity().supportFragmentManager
         } else {
-            // In phone mode, the DayViewFragment is the host, so we use its childFragmentManager
-            parentFragment?.parentFragmentManager?.beginTransaction()
-                ?.replace(R.id.calendar_view_container, detailFragment)
-                ?.addToBackStack(null)
-                ?.commit()
+            parentFragment?.parentFragmentManager
+        } ?: return
+
+        val containerId = if (isTablet) {
+            R.id.add_event_fragment_container
+        } else {
+            R.id.calendar_view_container
         }
+
+        // Pop the previous event detail from the back stack if it exists.
+        fragmentManager.popBackStack("event_detail", FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
+        // Add the new fragment in a transaction that is added to the back stack.
+        fragmentManager.beginTransaction()
+            .replace(containerId, detailFragment)
+            .addToBackStack("event_detail")
+            .commit()
     }
 
     companion object {

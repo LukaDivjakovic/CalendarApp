@@ -10,6 +10,15 @@ import java.time.LocalDate
 
 class WeekViewFragment : Fragment() {
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().supportFragmentManager.setFragmentResultListener("event_changed_key", this) { _, _ ->
+            childFragmentManager.fragments.forEach { fragment ->
+                (fragment as? DayColumnFragment)?.refreshEvents()
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

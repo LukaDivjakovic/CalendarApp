@@ -9,6 +9,14 @@ import java.time.LocalDate
 
 class DayViewFragment : Fragment() {
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().supportFragmentManager.setFragmentResultListener("event_changed_key", this) { _, _ ->
+            val dayColumnFragment = childFragmentManager.findFragmentById(R.id.day_column_container) as? DayColumnFragment
+            dayColumnFragment?.refreshEvents()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
