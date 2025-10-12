@@ -15,6 +15,17 @@ import java.time.LocalDate
 
 class DayViewFragment : Fragment() {
 
+    private lateinit var allDayEventsRecyclerView: RecyclerView
+    private lateinit var dayEventsRecyclerView: RecyclerView
+    private lateinit var allDayEventsContainer: View
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().supportFragmentManager.setFragmentResultListener("event_saved_key", this) { _, _ ->
+            loadEvents()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -26,13 +37,17 @@ class DayViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val allDayEventsRecyclerView = view.findViewById<RecyclerView>(R.id.all_day_events_recycler_view)
-        val dayEventsRecyclerView = view.findViewById<RecyclerView>(R.id.day_events_recycler_view)
-        val allDayEventsContainer = view.findViewById<View>(R.id.all_day_events_container)
+        allDayEventsRecyclerView = view.findViewById(R.id.all_day_events_recycler_view)
+        dayEventsRecyclerView = view.findViewById(R.id.day_events_recycler_view)
+        allDayEventsContainer = view.findViewById(R.id.all_day_events_container)
 
         allDayEventsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         dayEventsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        loadEvents()
+    }
+
+    private fun loadEvents() {
         lifecycleScope.launch {
             val today = LocalDate.now()
             val startOfDay = today.atStartOfDay()
@@ -58,15 +73,16 @@ class DayViewFragment : Fragment() {
         val isTablet = resources.getBoolean(R.bool.isTablet)
         val detailFragment = EventDetailFragment.newInstance(event)
 
-        val transaction = parentFragmentManager.beginTransaction()
-
         if (isTablet) {
-            transaction.replace(R.id.add_event_fragment_container, detailFragment)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.add_event_fragment_container, detailFragment)
+                .addToBackStack(null)
+                .commit()
         } else {
-            transaction.replace(R.id.calendar_view_container, detailFragment)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.calendar_view_container, detailFragment)
+                .addToBackStack(null)
+                .commit()
         }
-
-        transaction.addToBackStack(null)
-        transaction.commit()
     }
 }

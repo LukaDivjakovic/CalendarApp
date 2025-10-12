@@ -155,6 +155,10 @@ class AddEventFragment : Fragment() {
             val eventDao = AppDatabase.getDatabase(requireContext()).eventDao()
             eventDao.insert(newEvent)
             Toast.makeText(requireContext(), "Event saved!", Toast.LENGTH_SHORT).show()
+
+            // Notify the DayViewFragment that an event was saved
+            requireActivity().supportFragmentManager.setFragmentResult("event_saved_key", Bundle())
+
             if(!resources.getBoolean(R.bool.isTablet)){
                 parentFragmentManager.popBackStack()
             }

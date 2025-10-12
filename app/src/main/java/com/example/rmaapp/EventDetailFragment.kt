@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import com.example.rmaapp.database.entities.Event
 
@@ -33,6 +34,7 @@ class EventDetailFragment : Fragment() {
         val titleTextView = view.findViewById<TextView>(R.id.detail_event_title)
         val timeTextView = view.findViewById<TextView>(R.id.detail_event_time)
         val descriptionTextView = view.findViewById<TextView>(R.id.detail_event_description)
+        val exitButton = view.findViewById<ImageButton>(R.id.exit_button)
 
         titleTextView.text = event.title
         descriptionTextView.text = event.description
@@ -43,6 +45,10 @@ class EventDetailFragment : Fragment() {
             val startTime = event.startTime.toLocalTime().toString()
             val endTime = event.endTime.toLocalTime().toString()
             timeTextView.text = "$startTime - $endTime"
+        }
+
+        exitButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
     }
 

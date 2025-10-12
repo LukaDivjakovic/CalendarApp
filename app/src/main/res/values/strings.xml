@@ -6,6 +6,7 @@
     <string name="week_view">Week View</string>
     <string name="day_view">Day View</string>
     <string name="clock_fragment">Clock Fragment</string>
+    <string name="close">Close</string>
 
     <!-- Add Event Page -->
     <string name="event_title">Title</string>
