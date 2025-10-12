@@ -25,15 +25,12 @@ class AddEventFragment : Fragment() {
     private lateinit var eventDescriptionInput: TextInputEditText
     private lateinit var startDateButton: Button
     private lateinit var startTimeButton: Button
-    private lateinit var endDateButton: Button
     private lateinit var endTimeButton: Button
     private lateinit var allDaySwitch: SwitchMaterial
     private lateinit var saveEventButton: Button
-    private lateinit var cancelButton: Button
 
     private var startDate: LocalDate? = null
     private var startTime: LocalTime? = null
-    private var endDate: LocalDate? = null
     private var endTime: LocalTime? = null
 
     override fun onCreateView(
@@ -49,25 +46,16 @@ class AddEventFragment : Fragment() {
         eventDescriptionInput = view.findViewById(R.id.event_description_input)
         startDateButton = view.findViewById(R.id.start_date_button)
         startTimeButton = view.findViewById(R.id.start_time_button)
-        endDateButton = view.findViewById(R.id.end_date_button)
         endTimeButton = view.findViewById(R.id.end_time_button)
         allDaySwitch = view.findViewById(R.id.all_day_switch)
         saveEventButton = view.findViewById(R.id.save_event_button)
-
-        // The cancel button may not exist in the tablet layout
-        if(view.findViewById<Button>(R.id.cancel_button) != null) {
-            cancelButton = view.findViewById(R.id.cancel_button)
-            cancelButton.setOnClickListener { parentFragmentManager.popBackStack() }
-        }
-
 
         setupClickListeners()
     }
 
     private fun setupClickListeners() {
-        startDateButton.setOnClickListener { pickDate(isStart = true) }
+        startDateButton.setOnClickListener { pickDate() }
         startTimeButton.setOnClickListener { pickTime(isStart = true) }
-        endDateButton.setOnClickListener { pickDate(isStart = false) }
         endTimeButton.setOnClickListener { pickTime(isStart = false) }
 
         // Add a listener to the all-day switch
@@ -75,7 +63,6 @@ class AddEventFragment : Fragment() {
             // Disable time and end date pickers when "All-day" is on
             startTimeButton.isEnabled = !isChecked
             endTimeButton.isEnabled = !isChecked
-            endDateButton.isEnabled = !isChecked
 
             if (isChecked) {
                 // Clear time values if the switch is on
@@ -89,24 +76,14 @@ class AddEventFragment : Fragment() {
         saveEventButton.setOnClickListener { saveEvent() }
     }
 
-    private fun pickDate(isStart: Boolean) {
+    private fun pickDate() {
         val today = LocalDate.now()
         DatePickerDialog(
             requireContext(),
             { _, year, month, dayOfMonth ->
                 val selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
-                if (isStart) {
-                    startDate = selectedDate
-                    startDateButton.text = selectedDate.toString()
-                    // If it's an all-day event, also set the end date
-                    if (allDaySwitch.isChecked) {
-                        endDate = selectedDate
-                        endDateButton.text = selectedDate.toString()
-                    }
-                } else {
-                    endDate = selectedDate
-                    endDateButton.text = selectedDate.toString()
-                }
+                startDate = selectedDate
+                startDateButton.text = selectedDate.toString()
             },
             today.year,
             today.monthValue - 1,
@@ -153,12 +130,12 @@ class AddEventFragment : Fragment() {
             startDateTime = startDate!!.atStartOfDay()
             endDateTime = startDate!!.plusDays(1).atStartOfDay().minusSeconds(1) // End of the day
         } else {
-            if (startDate == null || startTime == null || endDate == null || endTime == null) {
+            if (startDate == null || startTime == null || endTime == null) {
                 Toast.makeText(requireContext(), "Please select start and end dates and times", Toast.LENGTH_SHORT).show()
                 return
             }
             startDateTime = LocalDateTime.of(startDate, startTime)
-            endDateTime = LocalDateTime.of(endDate, endTime)
+            endDateTime = LocalDateTime.of(startDate, endTime)
 
             if (endDateTime.isBefore(startDateTime)) {
                 Toast.makeText(requireContext(), "End time cannot be before start time", Toast.LENGTH_SHORT).show()

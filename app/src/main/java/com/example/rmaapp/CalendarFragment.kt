@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.google.android.material.appbar.MaterialToolbar
 
 class CalendarFragment : Fragment() {
@@ -55,19 +56,25 @@ class CalendarFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_add_event -> {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, AddEventFragment())
+                childFragmentManager.beginTransaction()
+                    .replace(R.id.calendar_view_container, AddEventFragment())
                     .addToBackStack(null)
                     .commit()
                 true
             }
             R.id.action_day_view -> {
+                if (childFragmentManager.backStackEntryCount > 0) {
+                    childFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                }
                 childFragmentManager.beginTransaction()
                     .replace(R.id.calendar_view_container, DayViewFragment())
                     .commit()
                 true
             }
             R.id.action_week_view -> {
+                if (childFragmentManager.backStackEntryCount > 0) {
+                    childFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                }
                 childFragmentManager.beginTransaction()
                     .replace(R.id.calendar_view_container, WeekViewFragment())
                     .commit()
