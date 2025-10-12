@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rmaapp.database.AppDatabase
+import com.example.rmaapp.database.entities.Event
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -44,12 +45,28 @@ class DayViewFragment : Fragment() {
 
             if (allDayEvents.isNotEmpty()) {
                 allDayEventsContainer.visibility = View.VISIBLE
-                allDayEventsRecyclerView.adapter = EventAdapter(allDayEvents)
+                allDayEventsRecyclerView.adapter = EventAdapter(allDayEvents, ::onEventClicked)
             } else {
                 allDayEventsContainer.visibility = View.GONE
             }
 
-            dayEventsRecyclerView.adapter = EventAdapter(timedEvents)
+            dayEventsRecyclerView.adapter = EventAdapter(timedEvents, ::onEventClicked)
         }
+    }
+
+    private fun onEventClicked(event: Event) {
+        val isTablet = resources.getBoolean(R.bool.isTablet)
+        val detailFragment = EventDetailFragment.newInstance(event)
+
+        val transaction = parentFragmentManager.beginTransaction()
+
+        if (isTablet) {
+            transaction.replace(R.id.add_event_fragment_container, detailFragment)
+        } else {
+            transaction.replace(R.id.calendar_view_container, detailFragment)
+        }
+
+        transaction.addToBackStack(null)
+        transaction.commit()
     }
 }

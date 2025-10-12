@@ -7,7 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rmaapp.database.entities.Event
 
-class EventAdapter(private val events: List<Event>) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
+class EventAdapter(
+    private val events: List<Event>,
+    private val onItemClick: (Event) -> Unit
+) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_event_card, parent, false)
@@ -17,6 +20,7 @@ class EventAdapter(private val events: List<Event>) : RecyclerView.Adapter<Event
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val event = events[position]
         holder.bind(event)
+        holder.itemView.setOnClickListener { onItemClick(event) }
     }
 
     override fun getItemCount(): Int = events.size
