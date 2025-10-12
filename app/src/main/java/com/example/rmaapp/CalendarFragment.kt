@@ -34,6 +34,12 @@ class CalendarFragment : Fragment() {
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
         (activity as AppCompatActivity).supportActionBar?.setDisplayShowTitleEnabled(false)
 
+        if (savedInstanceState == null) {
+            childFragmentManager.beginTransaction()
+                .replace(R.id.calendar_view_container, DayViewFragment())
+                .commit()
+        }
+
         return view
     }
 
@@ -56,11 +62,15 @@ class CalendarFragment : Fragment() {
                 true
             }
             R.id.action_day_view -> {
-                Toast.makeText(requireContext(), "Day view clicked", Toast.LENGTH_SHORT).show()
+                childFragmentManager.beginTransaction()
+                    .replace(R.id.calendar_view_container, DayViewFragment())
+                    .commit()
                 true
             }
             R.id.action_week_view -> {
-                Toast.makeText(requireContext(), "Week view clicked", Toast.LENGTH_SHORT).show()
+                childFragmentManager.beginTransaction()
+                    .replace(R.id.calendar_view_container, WeekViewFragment())
+                    .commit()
                 true
             }
             else -> super.onOptionsItemSelected(item)
