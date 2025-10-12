@@ -26,4 +26,7 @@ interface EventDao {
 
     @Query("SELECT * FROM events WHERE startTime >= :start AND endTime <= :end ORDER BY startTime ASC")
     fun getEventsForDateRange(start: LocalDateTime, end: LocalDateTime): Flow<List<Event>>
+
+    @Query("SELECT * FROM events WHERE startTime >= :startOfDay AND startTime < :endOfDay")
+    suspend fun getEventsForDate(startOfDay: LocalDateTime, endOfDay: LocalDateTime): List<Event>
 }
