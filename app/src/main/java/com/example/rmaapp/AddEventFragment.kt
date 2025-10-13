@@ -1,13 +1,20 @@
 package com.example.rmaapp
 
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.rmaapp.database.AppDatabase
@@ -18,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 class AddEventFragment : Fragment() {
 
@@ -153,7 +161,10 @@ class AddEventFragment : Fragment() {
 
         lifecycleScope.launch {
             val eventDao = AppDatabase.getDatabase(requireContext()).eventDao()
-            eventDao.insert(newEvent)
+            val eventId = eventDao.insert(newEvent).toInt()
+
+            scheduleNotification(eventId, title, startDateTime)
+
             Toast.makeText(requireContext(), "Event saved!", Toast.LENGTH_SHORT).show()
 
             // Notify other fragments that an event has changed
@@ -163,5 +174,48 @@ class AddEventFragment : Fragment() {
                 parentFragmentManager.popBackStack()
             }
         }
+    }
+
+    private fun scheduleNotification(eventId: Int, eventTitle: String, eventStartTime: LocalDateTime) {
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                showPermissionDialog()
+                return
+            }
+        }
+
+        val intent = Intent(requireContext(), EventNotificationReceiver::class.java).apply {
+            putExtra(EventNotificationReceiver.EVENT_ID_EXTRA, eventId)
+            putExtra(EventNotificationReceiver.EVENT_TITLE_EXTRA, eventTitle)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            eventId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val triggerAtMillis = eventStartTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerAtMillis,
+            pendingIntent
+        )
+    }
+
+    private fun showPermissionDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Permission Required")
+            .setMessage("To ensure notifications are delivered on time, please grant the Alarms & Reminders permission.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }
