@@ -1,8 +1,18 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     id("kotlin-parcelize")
+}
+
+// Load the local.properties file
+val localProperties = Properties()
+val localPropertiesFile = project.rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -17,6 +27,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Make the API key available in the BuildConfig class
+        val weatherApiKey = localProperties.getProperty("WEATHER_API_KEY") ?: ""
+        buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
     }
 
     buildTypes {
@@ -35,6 +49,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -49,6 +66,12 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // Networking
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.14.0")
 
     // Testing
     testImplementation(libs.junit)
