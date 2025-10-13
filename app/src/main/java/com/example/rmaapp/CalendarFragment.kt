@@ -11,15 +11,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.launch
 
 class CalendarFragment : Fragment() {
 
     private var isTablet: Boolean = false
+    private lateinit var locationHelper: LocationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        locationHelper = LocationHelper(requireContext())
     }
 
     override fun onCreateView(
@@ -27,7 +31,11 @@ class CalendarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_calendar, container, false)
+        return inflater.inflate(R.layout.fragment_calendar, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         isTablet = resources.getBoolean(R.bool.isTablet)
 
@@ -41,7 +49,22 @@ class CalendarFragment : Fragment() {
                 .commit()
         }
 
-        return view
+        viewLifecycleOwner.lifecycleScope.launch {
+            val location = locationHelper.getCurrentLocation()
+            if (location != null) {
+                Toast.makeText(
+                    requireContext(),
+                    "Location: ${location.latitude}, ${location.longitude}",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Location permission not granted.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

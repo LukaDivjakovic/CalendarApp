@@ -62,6 +62,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.activity)
 
+    // Location
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
