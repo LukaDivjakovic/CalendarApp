@@ -1,7 +1,10 @@
 package com.example.rmaapp
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
@@ -9,12 +12,13 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.rmaapp.database.AppDatabase
@@ -23,8 +27,8 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 
 class AddEventFragment : Fragment() {
@@ -58,6 +62,7 @@ class AddEventFragment : Fragment() {
         allDaySwitch = view.findViewById(R.id.all_day_switch)
         saveEventButton = view.findViewById(R.id.save_event_button)
 
+        createNotificationChannel()
         setupClickListeners()
     }
 
@@ -66,14 +71,11 @@ class AddEventFragment : Fragment() {
         startTimeButton.setOnClickListener { pickTime(isStart = true) }
         endTimeButton.setOnClickListener { pickTime(isStart = false) }
 
-        // Add a listener to the all-day switch
         allDaySwitch.setOnCheckedChangeListener { _, isChecked ->
-            // Disable time and end date pickers when "All-day" is on
             startTimeButton.isEnabled = !isChecked
             endTimeButton.isEnabled = !isChecked
 
             if (isChecked) {
-                // Clear time values if the switch is on
                 startTime = null
                 endTime = null
                 startTimeButton.text = getString(R.string.select_time)
@@ -115,11 +117,15 @@ class AddEventFragment : Fragment() {
             },
             now.hour,
             now.minute,
-            true // Use 24-hour format
+            true
         ).show()
     }
 
     private fun saveEvent() {
+        if (!checkNotificationPermissions(requireContext())) {
+            return
+        }
+
         val title = eventTitleInput.text.toString()
         if (title.isBlank()) {
             Toast.makeText(requireContext(), "Title cannot be empty", Toast.LENGTH_SHORT).show()
@@ -136,7 +142,7 @@ class AddEventFragment : Fragment() {
                 return
             }
             startDateTime = startDate!!.atStartOfDay()
-            endDateTime = startDate!!.plusDays(1).atStartOfDay().minusSeconds(1) // End of the day
+            endDateTime = startDate!!.plusDays(1).atStartOfDay().minusSeconds(1)
         } else {
             if (startDate == null || startTime == null || endTime == null) {
                 Toast.makeText(requireContext(), "Please select start and end dates and times", Toast.LENGTH_SHORT).show()
@@ -167,25 +173,16 @@ class AddEventFragment : Fragment() {
 
             Toast.makeText(requireContext(), "Event saved!", Toast.LENGTH_SHORT).show()
 
-            // Notify other fragments that an event has changed
             requireActivity().supportFragmentManager.setFragmentResult("event_changed_key", Bundle())
 
-            if(!resources.getBoolean(R.bool.isTablet)){
+            if (!resources.getBoolean(R.bool.isTablet)) {
                 parentFragmentManager.popBackStack()
             }
         }
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     private fun scheduleNotification(eventId: Int, eventTitle: String, eventStartTime: LocalDateTime) {
-        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                showPermissionDialog()
-                return
-            }
-        }
-
         val intent = Intent(requireContext(), EventNotificationReceiver::class.java).apply {
             putExtra(EventNotificationReceiver.EVENT_ID_EXTRA, eventId)
             putExtra(EventNotificationReceiver.EVENT_TITLE_EXTRA, eventTitle)
@@ -198,24 +195,58 @@ class AddEventFragment : Fragment() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerAtMillis = eventStartTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAtMillis,
-            pendingIntent
-        )
+        try {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
+        } catch (e: SecurityException) {
+            Log.e("AddEventFragment", "Failed to schedule exact alarm", e)
+            Toast.makeText(requireContext(), "Could not schedule notification due to system restrictions.", Toast.LENGTH_LONG).show()
+        }
     }
 
-    private fun showPermissionDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Permission Required")
-            .setMessage("To ensure notifications are delivered on time, please grant the Alarms & Reminders permission.")
-            .setPositiveButton("Go to Settings") { _, _ ->
-                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                startActivity(intent)
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = EventNotificationReceiver.NOTIFICATION_CHANNEL_NAME
+            val descriptionText = "Notifications for upcoming events"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(EventNotificationReceiver.NOTIFICATION_CHANNEL_ID, name, importance).apply {
+                description = descriptionText
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+            val notificationManager: NotificationManager =
+                requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun checkNotificationPermissions(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            val isEnabled = notificationManager.areNotificationsEnabled()
+
+            if (!isEnabled) {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                context.startActivity(intent)
+                return false
+            }
+        } else {
+            val areEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+            if (!areEnabled) {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                context.startActivity(intent)
+                return false
+            }
+        }
+        return true
     }
 }

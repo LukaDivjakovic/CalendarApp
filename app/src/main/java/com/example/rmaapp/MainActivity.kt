@@ -1,11 +1,7 @@
 package com.example.rmaapp
 
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -83,31 +79,7 @@ class MainActivity : AppCompatActivity() {
             bottomNavigationView.selectedItemId = R.id.action_clock
         }
 
-        createNotificationChannel()
-        requestNotificationPermission()
         requestLocationPermission()
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = EventNotificationReceiver.NOTIFICATION_CHANNEL_NAME
-            val descriptionText = "Notifications for upcoming events"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(EventNotificationReceiver.NOTIFICATION_CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
-            }
-        }
     }
 
     private fun requestLocationPermission() {
