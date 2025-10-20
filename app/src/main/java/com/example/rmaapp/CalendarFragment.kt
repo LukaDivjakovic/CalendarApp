@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
@@ -43,7 +44,18 @@ class CalendarFragment : Fragment() {
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
         (activity as AppCompatActivity).supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        if (savedInstanceState == null) {
+        val eventId = arguments?.getInt("event_id", 0) ?: 0
+        if (eventId > 0) {
+            view.post {
+                val eventDetailFragment = EventDetailFragment().apply {
+                    arguments = bundleOf("event_id" to eventId)
+                }
+                childFragmentManager.beginTransaction()
+                    .replace(R.id.calendar_view_container, eventDetailFragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
+        } else if (savedInstanceState == null) {
             childFragmentManager.beginTransaction()
                 .replace(R.id.calendar_view_container, DayViewFragment())
                 .commit()

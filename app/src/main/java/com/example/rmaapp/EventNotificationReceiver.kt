@@ -3,6 +3,7 @@ package com.example.rmaapp
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -27,12 +28,26 @@ class EventNotificationReceiver : BroadcastReceiver() {
 
         createNotificationChannel(context)
 
+        val contentIntent = Intent(context, MainActivity::class.java).apply {
+            putExtra("from_notification", true) // Add a marker
+            putExtra(EVENT_ID_EXTRA, eventId)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            eventId, // Use a unique request code for each event
+            contentIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.baseline_access_time_24)
             .setContentTitle("Event Starting Soon")
             .setContentText(eventTitle)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
 
         val notificationManager = NotificationManagerCompat.from(context)
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {

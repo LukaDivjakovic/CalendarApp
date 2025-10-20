@@ -1,6 +1,7 @@
 package com.example.rmaapp
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -74,12 +76,34 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // Set default fragment
         if (savedInstanceState == null) {
+            handleIntent(intent)
+        } else {
             bottomNavigationView.selectedItemId = R.id.action_clock
         }
 
         requestLocationPermission()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        if (intent?.getBooleanExtra("from_notification", false) == true) {
+            val eventId = intent.getIntExtra(EventNotificationReceiver.EVENT_ID_EXTRA, 0)
+            val calendarFragment = CalendarFragment().apply {
+                arguments = bundleOf("event_id" to eventId)
+            }
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, calendarFragment)
+                .commit()
+            bottomNavigationView.selectedItemId = R.id.action_calendar
+        } else {
+            bottomNavigationView.selectedItemId = R.id.action_clock
+        }
     }
 
     private fun requestLocationPermission() {
