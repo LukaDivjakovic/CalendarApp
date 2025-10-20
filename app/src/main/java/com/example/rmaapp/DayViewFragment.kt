@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -18,6 +18,7 @@ import java.time.LocalDate
 class DayViewFragment : Fragment() {
 
     private lateinit var locationHelper: LocationHelper
+    private lateinit var weatherDataTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +40,8 @@ class DayViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        weatherDataTextView = view.findViewById(R.id.weather_data)
+
         if (savedInstanceState == null) {
             val today = LocalDate.now()
             val dayColumnFragment = DayColumnFragment.newInstance(today, showOutline = false)
@@ -51,6 +54,7 @@ class DayViewFragment : Fragment() {
     }
 
     private fun fetchWeatherData() {
+        weatherDataTextView.text = "Weather data loading..."
         lifecycleScope.launch {
             val location = locationHelper.getCurrentLocation()
             if (location != null) {
@@ -79,33 +83,17 @@ class DayViewFragment : Fragment() {
                         if (weatherResponse != null) {
                             val temp = weatherResponse.current.tempC
                             val condition = weatherResponse.current.condition.text
-                            Toast.makeText(
-                                requireContext(),
-                                "Current temperature: $temp°C, Condition: $condition",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            weatherDataTextView.text = "Current temperature: $temp°C, Condition: $condition"
                         }
                     } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "Failed to fetch weather data: ${response.message()}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        weatherDataTextView.text = "Failed to fetch weather data: ${response.message()}"
                     }
                 } catch (e: Exception) {
                     Log.e("DayViewFragment", "Error fetching weather data", e)
-                    Toast.makeText(
-                        requireContext(),
-                        "An error occurred: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    weatherDataTextView.text = "An error occurred: ${e.message}"
                 }
             } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Could not get location.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                weatherDataTextView.text = "Could not get location."
             }
         }
     }

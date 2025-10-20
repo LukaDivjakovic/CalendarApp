@@ -7,12 +7,12 @@
     tools:context=".DayViewFragment">
 
     <TextView
-        android:id="@+id/weather_placeholder"
+        android:id="@+id/weather_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="16dp"
-        android:text="Today's Weather: (Not Implemented)" />
+        android:text="Weather data loading..." />
 
     <FrameLayout
         android:id="@+id/day_column_container"
