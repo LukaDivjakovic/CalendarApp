@@ -1,13 +1,23 @@
 package com.example.rmaapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.time.LocalDate
 
 class DayViewFragment : Fragment() {
+
+    private lateinit var locationHelper: LocationHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,6 +25,7 @@ class DayViewFragment : Fragment() {
             val dayColumnFragment = childFragmentManager.findFragmentById(R.id.day_column_container) as? DayColumnFragment
             dayColumnFragment?.refreshEvents()
         }
+        locationHelper = LocationHelper(requireContext())
     }
 
     override fun onCreateView(
@@ -34,6 +45,68 @@ class DayViewFragment : Fragment() {
             childFragmentManager.beginTransaction()
                 .replace(R.id.day_column_container, dayColumnFragment)
                 .commit()
+        }
+
+        fetchWeatherData()
+    }
+
+    private fun fetchWeatherData() {
+        lifecycleScope.launch {
+            val location = locationHelper.getCurrentLocation()
+            if (location != null) {
+                val lat = location.latitude
+                val lon = location.longitude
+
+                val moshi = Moshi.Builder()
+                    .add(KotlinJsonAdapterFactory())
+                    .build()
+
+                val retrofit = Retrofit.Builder()
+                    .baseUrl("https://api.weatherapi.com/")
+                    .addConverterFactory(MoshiConverterFactory.create(moshi))
+                    .build()
+
+                val weatherApiService = retrofit.create(WeatherApiService::class.java)
+
+                try {
+                    val response = weatherApiService.getCurrentWeather(
+                        apiKey = BuildConfig.WEATHER_API_KEY, // Replace with your API key
+                        location = "$lat,$lon"
+                    )
+
+                    if (response.isSuccessful) {
+                        val weatherResponse = response.body()
+                        if (weatherResponse != null) {
+                            val temp = weatherResponse.current.tempC
+                            val condition = weatherResponse.current.condition.text
+                            Toast.makeText(
+                                requireContext(),
+                                "Current temperature: $temp°C, Condition: $condition",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "Failed to fetch weather data: ${response.message()}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    Log.e("DayViewFragment", "Error fetching weather data", e)
+                    Toast.makeText(
+                        requireContext(),
+                        "An error occurred: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Could not get location.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 }
