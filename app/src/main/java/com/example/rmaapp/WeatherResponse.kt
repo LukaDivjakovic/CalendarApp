@@ -8,7 +8,8 @@ data class WeatherResponse(
 
 data class CurrentWeather(
     @Json(name = "temp_c") val tempC: Double,
-    @Json(name = "condition") val condition: WeatherCondition
+    @Json(name = "condition") val condition: WeatherCondition,
+    @Json(name = "precip_mm") val precipMm: Double
 )
 
 data class WeatherCondition(

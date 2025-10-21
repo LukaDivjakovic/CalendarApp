@@ -6,8 +6,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
+import coil.load
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.launch
@@ -19,6 +21,7 @@ class DayViewFragment : Fragment() {
 
     private lateinit var locationHelper: LocationHelper
     private lateinit var weatherDataTextView: TextView
+    private lateinit var weatherIconImageView: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +44,7 @@ class DayViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         weatherDataTextView = view.findViewById(R.id.weather_data)
+        weatherIconImageView = view.findViewById(R.id.weather_icon)
 
         if (savedInstanceState == null) {
             val today = LocalDate.now()
@@ -74,7 +78,7 @@ class DayViewFragment : Fragment() {
 
                 try {
                     val response = weatherApiService.getCurrentWeather(
-                        apiKey = BuildConfig.WEATHER_API_KEY, // Replace with your API key
+                        apiKey = BuildConfig.WEATHER_API_KEY,
                         location = "$lat,$lon"
                     )
 
@@ -83,7 +87,11 @@ class DayViewFragment : Fragment() {
                         if (weatherResponse != null) {
                             val temp = weatherResponse.current.tempC
                             val condition = weatherResponse.current.condition.text
-                            weatherDataTextView.text = "Current temperature: $temp°C, Condition: $condition"
+                            val precip = weatherResponse.current.precipMm
+                            val iconUrl = "https:${weatherResponse.current.condition.icon}"
+
+                            weatherIconImageView.load(iconUrl)
+                            weatherDataTextView.text = "$condition, $temp°C, $precip mm"
                         }
                     } else {
                         weatherDataTextView.text = "Failed to fetch weather data: ${response.message()}"

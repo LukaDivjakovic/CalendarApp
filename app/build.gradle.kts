@@ -62,6 +62,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.activity)
 
+    // Image Loading
+    implementation("io.coil-kt:coil:2.5.0")
+
     // Location
     implementation("com.google.android.gms:play-services-location:21.2.0")
 
