@@ -6,9 +6,12 @@
     tools:context=".ClockFragment">
 
     <TextView
+        android:id="@+id/clock_text_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="@string/clock_fragment" />
+        android:textSize="48sp"
+        android:textStyle="bold"
+        tools:text="12:34:56" />
 
 </FrameLayout>
