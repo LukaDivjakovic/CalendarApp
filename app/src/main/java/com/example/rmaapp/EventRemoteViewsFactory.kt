@@ -2,6 +2,7 @@ package com.example.rmaapp
 
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.example.rmaapp.database.AppDatabase
@@ -14,11 +15,12 @@ import java.time.format.DateTimeFormatter
 
 class EventRemoteViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
 
-    private var events: List<Event> = emptyList()
+    private var listItems: List<Any> = emptyList()
 
-    override fun onCreate() {
-        // Not needed for this implementation
-    }
+    private val VIEW_TYPE_HEADER = 0
+    private val VIEW_TYPE_EVENT = 1
+
+    override fun onCreate() {}
 
     override fun onDataSetChanged() {
         runBlocking {
@@ -26,39 +28,76 @@ class EventRemoteViewsFactory(private val context: Context) : RemoteViewsService
             val today = LocalDate.now()
             val startOfDay = today.atStartOfDay()
             val endOfDay = today.atTime(LocalTime.MAX)
-            events = db.eventDao().getEventsForDate(startOfDay, endOfDay).filter {
-                it.startTime.isAfter(LocalDateTime.now())
-            }.sortedBy { it.startTime }
+
+            val allEventsToday = db.eventDao().getEventsForDate(startOfDay, endOfDay)
+
+            val allDayEvents = allEventsToday.filter { it.isAllDay }.sortedBy { it.title }
+            val timedEvents = allEventsToday
+                .filter { !it.isAllDay && it.startTime.isAfter(LocalDateTime.now()) }
+                .sortedBy { it.startTime }
+
+            val combinedList = mutableListOf<Any>()
+            if (allDayEvents.isNotEmpty()) {
+                combinedList.add("All-Day")
+                combinedList.addAll(allDayEvents)
+            }
+            if (timedEvents.isNotEmpty()) {
+                combinedList.add("Upcoming")
+                combinedList.addAll(timedEvents)
+            }
+            listItems = combinedList
         }
     }
 
-    override fun onDestroy() {
-        // Not needed for this implementation
-    }
+    override fun onDestroy() {}
 
-    override fun getCount(): Int = events.size
+    override fun getCount(): Int = listItems.size
 
     override fun getViewAt(position: Int): RemoteViews {
-        val event = events[position]
-        val views = RemoteViews(context.packageName, R.layout.widget_item_layout)
+        val item = listItems[position]
+        val viewType = getItemViewType(position)
 
-        views.setTextViewText(R.id.widget_event_title, event.title)
-        views.setTextViewText(R.id.widget_event_time, event.startTime.format(DateTimeFormatter.ofPattern("HH:mm")))
+        return when (viewType) {
+            VIEW_TYPE_HEADER -> {
+                val views = RemoteViews(context.packageName, R.layout.widget_header_layout)
+                views.setTextViewText(R.id.widget_header, item as String)
+                views
+            }
+            else -> { // VIEW_TYPE_EVENT
+                val event = item as Event
+                val views = RemoteViews(context.packageName, R.layout.widget_item_layout)
 
-        // Set up the fill-in intent to handle clicks on individual items
-        val fillInIntent = Intent().apply {
-            putExtra("event_id", event.id)
+                views.setTextViewText(R.id.widget_event_title, event.title)
+
+                if (event.isAllDay) {
+                    views.setViewVisibility(R.id.widget_event_time, View.GONE)
+                } else {
+                    views.setViewVisibility(R.id.widget_event_time, View.VISIBLE)
+                    views.setTextViewText(R.id.widget_event_time, event.startTime.format(DateTimeFormatter.ofPattern("HH:mm")))
+                }
+
+                val fillInIntent = Intent().apply {
+                    putExtra("event_id", event.id)
+                }
+                views.setOnClickFillInIntent(R.id.widget_event_title, fillInIntent)
+                views
+            }
         }
-        views.setOnClickFillInIntent(R.id.widget_event_title, fillInIntent)
-
-        return views
     }
 
     override fun getLoadingView(): RemoteViews? = null
 
-    override fun getViewTypeCount(): Int = 1
+    override fun getViewTypeCount(): Int = 2
 
-    override fun getItemId(position: Int): Long = events[position].id.toLong()
+    // This is a helper function, not an override
+    private fun getItemViewType(position: Int): Int {
+        return if (listItems[position] is String) VIEW_TYPE_HEADER else VIEW_TYPE_EVENT
+    }
+
+    override fun getItemId(position: Int): Long {
+        val item = listItems[position]
+        return if (item is Event) item.id.toLong() else position.toLong()
+    }
 
     override fun hasStableIds(): Boolean = true
 }
