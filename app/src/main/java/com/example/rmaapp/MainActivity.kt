@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                 .commit()
             bottomNavigationView.selectedItemId = R.id.action_calendar
         } else {
-            bottomNavigationView.selectedItemId = R.id.action_clock
+            bottomNavigationView.selectedItemId = R.id.action_calendar
         }
     }
 
