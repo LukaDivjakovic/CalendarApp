@@ -1,14 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/action_day_view"
         android:icon="@drawable/baseline_calendar_view_day_24"
         android:title="Day View"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/action_week_view"
         android:icon="@drawable/baseline_calendar_view_week_24"
         android:title="Week View"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_previous"
+        android:icon="@drawable/baseline_arrow_left_24"
+        android:title="Previous"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_next"
+        android:icon="@drawable/baseline_arrow_right_24"
+        android:title="Next"
+        app:showAsAction="always" />
+
 </menu>

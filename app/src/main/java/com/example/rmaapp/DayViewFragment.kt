@@ -22,9 +22,13 @@ class DayViewFragment : Fragment() {
     private lateinit var locationHelper: LocationHelper
     private lateinit var weatherDataTextView: TextView
     private lateinit var weatherIconImageView: ImageView
+    private var date: LocalDate? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        arguments?.let {
+            date = it.getSerializable("date") as LocalDate?
+        }
         requireActivity().supportFragmentManager.setFragmentResultListener("event_changed_key", this) { _, _ ->
             val dayColumnFragment = childFragmentManager.findFragmentById(R.id.day_column_container) as? DayColumnFragment
             dayColumnFragment?.refreshEvents()
@@ -46,13 +50,11 @@ class DayViewFragment : Fragment() {
         weatherDataTextView = view.findViewById(R.id.weather_data)
         weatherIconImageView = view.findViewById(R.id.weather_icon)
 
-        if (savedInstanceState == null) {
-            val today = LocalDate.now()
-            val dayColumnFragment = DayColumnFragment.newInstance(today, showOutline = false)
-            childFragmentManager.beginTransaction()
-                .replace(R.id.day_column_container, dayColumnFragment)
-                .commit()
-        }
+        val dayToShow = date ?: LocalDate.now()
+        val dayColumnFragment = DayColumnFragment.newInstance(dayToShow, showOutline = false)
+        childFragmentManager.beginTransaction()
+            .replace(R.id.day_column_container, dayColumnFragment)
+            .commit()
 
         fetchWeatherData()
     }
@@ -103,6 +105,16 @@ class DayViewFragment : Fragment() {
             } else {
                 weatherDataTextView.text = "Could not get location."
             }
+        }
+    }
+
+    companion object {
+        fun newInstance(date: LocalDate): DayViewFragment {
+            val fragment = DayViewFragment()
+            val args = Bundle()
+            args.putSerializable("date", date)
+            fragment.arguments = args
+            return fragment
         }
     }
 }
