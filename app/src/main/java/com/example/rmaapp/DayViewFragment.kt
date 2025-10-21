@@ -1,5 +1,6 @@
 package com.example.rmaapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -59,6 +60,7 @@ class DayViewFragment : Fragment() {
         fetchWeatherData()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun fetchWeatherData() {
         weatherDataTextView.text = "Weather data loading..."
         lifecycleScope.launch {
@@ -91,9 +93,11 @@ class DayViewFragment : Fragment() {
                             val condition = weatherResponse.current.condition.text
                             val precip = weatherResponse.current.precipMm
                             val iconUrl = "https:${weatherResponse.current.condition.icon}"
+                            val cityName = weatherResponse.location.name
+                            val localTime = weatherResponse.location.localtime
 
                             weatherIconImageView.load(iconUrl)
-                            weatherDataTextView.text = "$condition, $temp°C, $precip mm"
+                            weatherDataTextView.text = "$cityName, $localTime\n$condition, $temp°C, $precip mm"
                         }
                     } else {
                         weatherDataTextView.text = "Failed to fetch weather data: ${response.message()}"

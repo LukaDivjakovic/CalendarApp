@@ -3,7 +3,13 @@ package com.example.rmaapp
 import com.squareup.moshi.Json
 
 data class WeatherResponse(
+    @Json(name = "location") val location: Location,
     @Json(name = "current") val current: CurrentWeather
+)
+
+data class Location(
+    @Json(name = "name") val name: String,
+    @Json(name = "localtime") val localtime: String
 )
 
 data class CurrentWeather(
