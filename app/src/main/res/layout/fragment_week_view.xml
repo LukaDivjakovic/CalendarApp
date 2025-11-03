@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:weightSum="7"
-    tools:context=".WeekViewFragment">
+    tools:context=".fragments.WeekViewFragment">
 
     <FrameLayout
         android:id="@+id/day_1_container"

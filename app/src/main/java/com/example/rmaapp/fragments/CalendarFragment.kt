@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.rmaapp.R
 import com.google.android.material.appbar.MaterialToolbar
 import java.time.LocalDate
 
@@ -45,7 +46,7 @@ class CalendarFragment : Fragment() {
 
     private fun updateView() {
         val fragment = if (isWeekView) {
-            WeekViewFragment.newInstance(currentDate)
+            WeekViewFragment.Companion.newInstance(currentDate)
         } else {
             DayViewFragment.newInstance(currentDate)
         }

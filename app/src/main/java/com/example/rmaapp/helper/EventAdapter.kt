@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.helper
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.rmaapp.R
 import com.example.rmaapp.database.entities.Event
 
 class EventAdapter(

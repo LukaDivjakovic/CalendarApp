@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.widget
 
 import android.content.Intent
 import android.widget.RemoteViewsService

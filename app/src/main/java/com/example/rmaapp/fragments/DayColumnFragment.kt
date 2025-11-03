@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -11,6 +11,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.rmaapp.helper.EventAdapter
+import com.example.rmaapp.R
 import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
 import kotlinx.coroutines.launch
@@ -86,7 +88,7 @@ class DayColumnFragment : Fragment() {
 
     private fun onEventClicked(event: Event) {
         val isTablet = resources.getBoolean(R.bool.isTablet)
-        val detailFragment = EventDetailFragment.newInstance(event)
+        val detailFragment = EventDetailFragment.Companion.newInstance(event)
 
         val fragmentManager = if (isTablet) {
             requireActivity().supportFragmentManager

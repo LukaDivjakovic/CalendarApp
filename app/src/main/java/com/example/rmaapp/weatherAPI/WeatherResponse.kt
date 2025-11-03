@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.weatherAPI
 
 import com.squareup.moshi.Json
 

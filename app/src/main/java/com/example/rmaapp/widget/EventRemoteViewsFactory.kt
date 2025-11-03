@@ -1,10 +1,11 @@
-package com.example.rmaapp
+package com.example.rmaapp.widget
 
 import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.example.rmaapp.R
 import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
 import kotlinx.coroutines.runBlocking

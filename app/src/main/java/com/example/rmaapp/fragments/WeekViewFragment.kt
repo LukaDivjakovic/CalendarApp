@@ -1,10 +1,11 @@
-package com.example.rmaapp
+package com.example.rmaapp.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.rmaapp.R
 import java.time.DayOfWeek
 import java.time.LocalDate
 

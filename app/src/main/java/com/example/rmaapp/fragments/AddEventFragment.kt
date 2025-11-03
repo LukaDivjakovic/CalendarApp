@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.fragments
 
 import android.annotation.SuppressLint
 import android.app.AlarmManager
@@ -21,6 +21,8 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.rmaapp.EventNotificationReceiver
+import com.example.rmaapp.R
 import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -184,8 +186,8 @@ class AddEventFragment : Fragment() {
     @SuppressLint("ScheduleExactAlarm")
     private fun scheduleNotification(eventId: Int, eventTitle: String, eventStartTime: LocalDateTime) {
         val intent = Intent(requireContext(), EventNotificationReceiver::class.java).apply {
-            putExtra(EventNotificationReceiver.EVENT_ID_EXTRA, eventId)
-            putExtra(EventNotificationReceiver.EVENT_TITLE_EXTRA, eventTitle)
+            putExtra(EventNotificationReceiver.Companion.EVENT_ID_EXTRA, eventId)
+            putExtra(EventNotificationReceiver.Companion.EVENT_TITLE_EXTRA, eventTitle)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -212,10 +214,10 @@ class AddEventFragment : Fragment() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = EventNotificationReceiver.NOTIFICATION_CHANNEL_NAME
+            val name = EventNotificationReceiver.Companion.NOTIFICATION_CHANNEL_NAME
             val descriptionText = "Notifications for upcoming events"
             val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(EventNotificationReceiver.NOTIFICATION_CHANNEL_ID, name, importance).apply {
+            val channel = NotificationChannel(EventNotificationReceiver.Companion.NOTIFICATION_CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
             val notificationManager: NotificationManager =

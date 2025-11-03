@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.fragments
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -13,6 +13,8 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
+import com.example.rmaapp.EventNotificationReceiver
+import com.example.rmaapp.R
 import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
 import kotlinx.coroutines.launch

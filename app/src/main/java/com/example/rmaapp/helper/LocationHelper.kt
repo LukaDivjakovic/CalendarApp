@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.helper
 
 import android.Manifest
 import android.content.Context
@@ -35,7 +35,6 @@ class LocationHelper(private val context: Context) {
             ).addOnSuccessListener { location ->
                 continuation.resume(location)
             }.addOnFailureListener { exception ->
-                // You might want to log the exception here
                 continuation.resume(null)
             }
 

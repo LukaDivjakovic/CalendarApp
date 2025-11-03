@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="4dp"
-    tools:context=".DayColumnFragment">
+    tools:context=".fragments.DayColumnFragment">
 
     <TextView
         android:id="@+id/day_header_text"

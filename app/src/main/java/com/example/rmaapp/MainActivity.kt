@@ -15,6 +15,9 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.example.rmaapp.fragments.AddEventFragment
+import com.example.rmaapp.fragments.CalendarFragment
+import com.example.rmaapp.fragments.ClockFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {

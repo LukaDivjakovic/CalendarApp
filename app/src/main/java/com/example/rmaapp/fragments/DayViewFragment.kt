@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -11,6 +11,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import coil.load
+import com.example.rmaapp.BuildConfig
+import com.example.rmaapp.helper.LocationHelper
+import com.example.rmaapp.R
+import com.example.rmaapp.weatherAPI.WeatherApiService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.launch

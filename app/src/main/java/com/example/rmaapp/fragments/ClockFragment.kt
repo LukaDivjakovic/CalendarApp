@@ -1,4 +1,4 @@
-package com.example.rmaapp
+package com.example.rmaapp.fragments
 
 import android.os.Bundle
 import android.os.Handler
@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.rmaapp.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
