@@ -88,7 +88,7 @@ class DayColumnFragment : Fragment() {
 
     private fun onEventClicked(event: Event) {
         val isTablet = resources.getBoolean(R.bool.isTablet)
-        val detailFragment = EventDetailFragment.Companion.newInstance(event)
+        val detailFragment = EventDetailFragment.newInstance(event)
 
         val fragmentManager = if (isTablet) {
             requireActivity().supportFragmentManager

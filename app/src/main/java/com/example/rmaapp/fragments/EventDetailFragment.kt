@@ -68,10 +68,10 @@ class EventDetailFragment : Fragment() {
 
                 val eventDao = AppDatabase.getDatabase(requireContext()).eventDao()
                 eventDao.delete(event)
-                
+
                 // Notify other fragments that an event has changed
                 requireActivity().supportFragmentManager.setFragmentResult("event_changed_key", Bundle())
-                
+
                 parentFragmentManager.popBackStack()
             }
         }

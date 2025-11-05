@@ -49,7 +49,7 @@ class CalendarActivity : AppCompatActivity() {
             updateView()
             if (isTablet) {
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.add_event_container, AddEventFragment())
+                    .replace(R.id.add_event_fragment_container, AddEventFragment())
                     .commit()
             }
             bottomNavigationView.selectedItemId = R.id.action_calendar
