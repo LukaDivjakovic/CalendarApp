@@ -4,20 +4,14 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.Fragment
-import com.example.rmaapp.fragments.AddEventFragment
-import com.example.rmaapp.fragments.CalendarFragment
-import com.example.rmaapp.fragments.ClockFragment
+import com.example.rmaapp.activities.CalendarActivity
+import com.example.rmaapp.activities.ClockActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -38,51 +32,30 @@ class MainActivity : AppCompatActivity() {
         isTablet = resources.getBoolean(R.bool.isTablet)
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        val mainLayout = findViewById<ConstraintLayout>(R.id.main)
-        val addEventContainer = findViewById<View?>(R.id.add_event_fragment_container)
 
         bottomNavigationView.setOnItemSelectedListener { item ->
-            var selectedFragment: Fragment? = null
             when (item.itemId) {
                 R.id.action_clock -> {
-                    selectedFragment = ClockFragment()
-                    if (isTablet) {
-                        addEventContainer?.visibility = View.GONE
-                        val constraintSet = ConstraintSet()
-                        constraintSet.clone(mainLayout)
-                        constraintSet.connect(R.id.fragment_container, ConstraintSet.END, R.id.main, ConstraintSet.END)
-                        constraintSet.applyTo(mainLayout)
-
-                        supportFragmentManager.findFragmentById(R.id.add_event_fragment_container)?.let {
-                            supportFragmentManager.beginTransaction().remove(it).commit()
-                        }
-                    }
+                    val intent = Intent(this, ClockActivity::class.java)
+                    startActivity(intent)
+                    true
                 }
                 R.id.action_calendar -> {
-                    selectedFragment = CalendarFragment()
-                    if (isTablet) {
-                        addEventContainer?.visibility = View.VISIBLE
-                        val constraintSet = ConstraintSet()
-                        constraintSet.clone(mainLayout)
-                        constraintSet.connect(R.id.fragment_container, ConstraintSet.END, R.id.guideline, ConstraintSet.START)
-                        constraintSet.applyTo(mainLayout)
-
-                        supportFragmentManager.beginTransaction()
-                            .replace(R.id.add_event_fragment_container, AddEventFragment())
-                            .commit()
+                    val intent = Intent(this, CalendarActivity::class.java)
+                    if (getIntent().extras != null) {
+                        intent.putExtras(getIntent())
                     }
+                    startActivity(intent)
+                    true
                 }
+                else -> false
             }
-            if (selectedFragment != null) {
-                supportFragmentManager.beginTransaction().replace(R.id.fragment_container, selectedFragment).commit()
-            }
-            true
         }
 
         if (savedInstanceState == null) {
             handleIntent(intent)
         } else {
-            bottomNavigationView.selectedItemId = R.id.action_clock
+            bottomNavigationView.selectedItemId = R.id.action_calendar
         }
 
         requestLocationPermission()
@@ -90,19 +63,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         handleIntent(intent)
     }
 
     private fun handleIntent(intent: Intent?) {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         if (intent?.getBooleanExtra("from_notification", false) == true) {
-            val eventId = intent.getIntExtra(EventNotificationReceiver.EVENT_ID_EXTRA, 0)
-            val calendarFragment = CalendarFragment().apply {
-                arguments = bundleOf("event_id" to eventId)
-            }
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, calendarFragment)
-                .commit()
             bottomNavigationView.selectedItemId = R.id.action_calendar
         } else {
             bottomNavigationView.selectedItemId = R.id.action_calendar
