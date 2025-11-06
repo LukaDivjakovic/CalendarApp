@@ -7,6 +7,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -25,6 +27,7 @@ import com.example.rmaapp.EventNotificationReceiver
 import com.example.rmaapp.R
 import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
+import com.example.rmaapp.widget.EventWidgetProvider
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
@@ -174,6 +177,13 @@ class AddEventFragment : Fragment() {
             scheduleNotification(eventId, title, startDateTime)
 
             Toast.makeText(requireContext(), "Event saved!", Toast.LENGTH_SHORT).show()
+
+            // Update the widget
+            val intent = Intent(requireContext(), EventWidgetProvider::class.java)
+            intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            val ids = AppWidgetManager.getInstance(requireContext()).getAppWidgetIds(ComponentName(requireContext(), EventWidgetProvider::class.java))
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            requireContext().sendBroadcast(intent)
 
             requireActivity().supportFragmentManager.setFragmentResult("event_changed_key", Bundle())
 

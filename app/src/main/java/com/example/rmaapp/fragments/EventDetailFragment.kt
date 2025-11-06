@@ -2,6 +2,8 @@ package com.example.rmaapp.fragments
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -17,6 +19,7 @@ import com.example.rmaapp.EventNotificationReceiver
 import com.example.rmaapp.R
 import com.example.rmaapp.database.AppDatabase
 import com.example.rmaapp.database.entities.Event
+import com.example.rmaapp.widget.EventWidgetProvider
 import kotlinx.coroutines.launch
 
 class EventDetailFragment : Fragment() {
@@ -68,6 +71,13 @@ class EventDetailFragment : Fragment() {
 
                 val eventDao = AppDatabase.getDatabase(requireContext()).eventDao()
                 eventDao.delete(event)
+
+                // Update the widget
+                val intent = Intent(requireContext(), EventWidgetProvider::class.java)
+                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                val ids = AppWidgetManager.getInstance(requireContext()).getAppWidgetIds(ComponentName(requireContext(), EventWidgetProvider::class.java))
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                requireContext().sendBroadcast(intent)
 
                 // Notify other fragments that an event has changed
                 requireActivity().supportFragmentManager.setFragmentResult("event_changed_key", Bundle())
